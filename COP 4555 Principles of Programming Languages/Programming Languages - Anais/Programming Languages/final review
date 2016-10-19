@@ -1,0 +1,4 @@
+let rec deleteMin = function
+    |Lf -> failwith "no min"
+    |Br(n, Lf, t2) -> t2
+    |Br(n, t1, t2) -> Br(n, deleteMin t1, t2)

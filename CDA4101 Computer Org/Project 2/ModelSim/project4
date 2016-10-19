@@ -1,0 +1,76 @@
+///////////////////////////////////////////////////////////////////////////
+// Inputs: Always clk and reset
+//         Others are for your particular application.
+// Outputs: Always will depend on your application.
+module mycachecircuit(input logic clk,
+                input logic reset,
+		input logic Op1,
+		input logic Op0,
+		input logic A,
+		input logic B,
+		input logic Cin,
+		output logic Y1,
+		output logic Y0,
+		output logic Zero);
+
+// What we are saying here is that we need two bits (1 down to 0)
+// For states in our state machine
+// Our states will be S0, S1, S2, S3
+// Change this to accomodate how many states you have.
+typedef enum logic[1:0] {S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, T0, T1, T2, Out0, Out1, Out2, Out3} statetype;
+
+// These will almost always be the same
+statetype state, nextstate;
+
+// Flip-flop for states (same for each)
+// The flip-flop is triggered when clk goes to 1, or reset goes to 1
+// Posedge = positive(1) edge for clk
+always_ff@(posedge clk, posedge reset)
+   if (reset) state <= S0;
+   else state <= nextstate;
+
+// State diagram here.
+// Change for your state diagram.
+always_comb
+    case (state)
+      S0: if (Op1) nextstate <= S2;
+          else nextstate <= S1
+      S1: if (Op0) nextstate <= S8;
+          else nextstate <= S4;
+      S2: if (Op0) nextstate <= S3;
+          else nextstate <= 0
+      S3: nextstate <= S0;
+      S4: if (A) nextstate <= S5;
+          else nextstate <= T0;
+      S5: if (B) nextstate <= S7;
+          else nextstate <= S6;
+      S6: if (Binv) nextstate <= T1;
+          else nextstate <= T0;
+      S7: if (Binv) nextstate <= T0;
+          else nextstate <= T1;
+      S8: if (A) nextstate <= T1;
+          else nextstate <= S5;
+      S9: if (A) nextstate <= S10;
+          else nextstate <= S5;
+      S10: if (B) nextstate <= S12;
+           else nextstate <= S11;
+      S11: if (Binv) nextstate <= T2;
+           else nextstate <= T1;
+      S12: if (Binv) nextstate <= T1;
+           else nextstate <= T2;
+      T0: if (Cin) nextstate <= Out1;
+          else nextstate <= Out0;
+      T1: if (Cin) nextstate <= Out2;
+          else nextstate <= Out1;
+      T2: if (Cin) nextstate <= Out3;
+          else nextstate <= Out2;
+endcase
+
+// Output logic: We hit if we reach S3
+//               We miss if we reach S2.
+assign Y1 = (state == Out2 || state == Out3);
+assign Y0 = (state == Out1 || state == Out3);
+assign Zero= (state == Out0);
+
+endmodule
+

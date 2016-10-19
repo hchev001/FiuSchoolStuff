@@ -1,0 +1,70 @@
+ONE
+let rec gcd = function
+  | (a,0) -> a
+  | (a,b) -> gcd (b, a % b)
+
+  let (.+) (a,b) (c,d) = 
+      let denom = b*d
+      let n = (denom/b)* a + (denom/d)*c
+      let div = gcd(n,denom)
+      (n/div, denom/div);;
+
+  let (.*) (a,b) (c,d) = 
+      let num = a*c
+      let denom = b*d
+      let div = gcd(num,denom)
+      (num/div,denom/div);;
+
+TWO
+Write an F# function revlists xs that takes a list of lists xs and reverses all the sub-lists:
+  > revlists [[0;1;1];[3;2];[];[5]];;
+  val it : int list list = [[1; 1; 0]; [2; 3]; []; [5]]
+Hint: This takes just one line of code, using List.map and List.rev.
+
+let revlists xs = List.map List.rev xs;;
+
+THREE
+Write an F# function interleave(xs,ys) that interleaves two lists:
+  > interleave ([1;2;3],[4;5;6]);;
+  val it : int list = [1; 4; 2; 5; 3; 6]
+
+
+
+  let rec interleave = function
+      |([],[]) -> []
+      |(x::xs,y::ys) -> x::y::interleave(xs,ys);;
+
+FOUR
+
+let rec gencut (n,xs) = 
+    if n=0 then ([],xs)
+    else let (left,right) = gencut(n-1, List.tail xs)
+         (List.head xs::left, right);;
+
+let cut xs = gencut(List.length xs/2, xs);;
+
+
+FIVE
+Write an F# function shuffle xs that takes an even-length list, cuts it into two equal-sized pieces, and then interleaves the pieces:
+
+let shuffle xs = interleave(cut xs);;
+
+
+SIX
+
+
+let countaux(deck,target) = 
+    if deck=target then 0
+    else countaux(shuffle(deck), target) + 1;;
+
+let countshuffles n =
+    let alist = [1..n]
+    let shuff = shuffle(alist)
+    countaux(shuff,alist) + 1;;
+
+let rec sum (l,u,e) = 
+    if l=u then e l
+    else e l + sum (l+1 ,u, e);; 
+
+
+

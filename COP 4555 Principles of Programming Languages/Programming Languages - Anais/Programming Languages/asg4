@@ -1,0 +1,158 @@
+Anais Hernandez
+PID 3884585
+COP 4555 U01
+HW #4
+
+
+QUESTION 1
+let mrev = makeMonitoredFun List.rev
+
+In this example, F# can't tell what the type of mrev should be, since it could be a list of anything. 
+_alist indicates that the type variable is not universally quantified. In F# when there is a declaration, mrev can have a polymorphic value only if it gets the value of a syntactic value, which is an expression that can be evaluated without doing any computation. In this case, makeMonitoredFun List.rev, is calling makeMonitoredFun, a function call, so it is not a syntactic value, which is why we get this value restriction error message.
+
+let mrev = fun x -> (makeMonitoredFun List.rev) x
+
+Yes, this solves the problem. One of the ways we can deal with value restriction is through eta expansion, i.e "(fun x -> e x". By adding, "fun x -> (makeMonitoredFun List.rev) x"  it makes it a syntactic value and mrev is now polymorphic.
+
+
+QUESTION 2
+ E -> E+T | E-T | T
+ T -> T*F | T/F | F
+ F -> i | (E)
+
+ Modify this grammar to allow an exponentiation operator, ^ :
+ E -> E+T | E-T | T
+ T -> T*P | T/P | P
+ P -> F^P | F
+ F -> i   | (E)
+
+
+QUESTION 3 ——know for final 
+S -> if E then S | if E then S else S | begin S L | print E
+L -> end | ; S L
+E -> i
+
+A grammar is ambiguous if there is at least one string with two or more parse trees. In this grammar the following string is accepted:
+if E1 then if E2 then E3 else E4
+The string can be parsed in two different ways:
+IF E1 THEN (IF E2 THEN E3 ) ELSE E4        IF E1 THEN (IF E2 THEN E3 ELSE E4)
+         IF                                       IF
+    /    |    \                                  /  \
+   E1   IF    E4                      OR        E1   IF
+        /\                                          / | \
+       E2 E3                                       E2 E3 E4
+
+
+               S
+	/  /   |        \
+       if E   then       S
+         /         / /  |    \  \
+        i        if E  then  S  else  S
+                   /        / \      / \
+                  i     print  E  print E
+                              /         /
+                             i         i
+Therefore, this grammar is ambiguous.
+
+
+
+QUESTION 4
+
+  // lookahead token
+  int tok = nextToken();
+  
+  void advance() 
+  {
+  	tok = nextToken();
+  }
+
+  // used whenever a specific token t must appear next
+  void eat(int t) 
+  {
+  	if (tok == t) 
+  		advance(); 
+  	else 
+  		error("Current token is not 'i'.");
+  }
+
+  void S() 
+  {
+
+  	if(tok == "if")
+  	{
+  		advance(); 
+  		E();
+
+  		if(tok == "then")
+  		{
+  			advance();
+  			S();
+
+  			if(tok == "else")
+  			{
+  				advance();
+  				S();
+  				break;
+  			}
+  		}
+  	}
+  	else if(tok == "begin")
+  	{
+  		advance(); 
+  		S(); 
+  		L(); 
+  		break;
+  	}
+  	else if(tok == "print")
+  	{
+  		advance();
+  		E();
+  		break;
+  	}
+  	else
+  	{
+  		error("Current token is not 'if', 'then', 'else', 'begin', or 'print'.");
+  	}
+  }
+
+  void L() 
+  {
+    switch (tok) 
+    {
+      case END: advance(); break;
+      case SEMICOLON: advance(); S(); L(); break;
+      default: error("Current token must be 'end' or ';' ");
+    }
+  }
+
+  void E() 
+  {
+    eat(ID);
+  }
+
+  void main() 
+  {
+    S();
+    if (tok == EOF) 
+    	accept(); 
+    else 
+    	error();
+  }
+
+
+
+
+
+—review
+void S()
+{
+	switch (tok)
+	{
+		case IF: advance(); E(); eat(THEN); S();
+			if (tok == “ELSE”)
+			{
+				advance(); S();
+			} 
+			break;
+	}
+}
